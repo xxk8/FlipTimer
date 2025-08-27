@@ -1,0 +1,17 @@
+.tick-flip-panel::before {
+    background-color: transparent !important;
+}
+
+.tick-flip-panel-back-shadow,
+.tick-flip-panel-front-shadow,
+.tick-flip-panel-back-highlight {
+    display: none !important;
+}
+
+.tick-flip-panel {
+    background-image: none !important;
+}
+
+.tick-label {
+    font-size: 4.5em !important;
+}

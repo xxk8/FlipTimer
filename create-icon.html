@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+        <title>图标生成器</title>
+</head>
+
+<body>
+        <canvas id="iconCanvas" width="256" height="256" style="border: 1px solid #ccc;"></canvas>
+        <br>
+        <button onclick="downloadIcon()">下载PNG图标</button>
+
+        <script>
+                const canvas = document.getElementById('iconCanvas');
+                const ctx = canvas.getContext('2d');
+
+                // 绘制简单的倒计时器图标
+                function drawIcon () {
+                        // 背景
+                        ctx.fillStyle = '#2c3e50';
+                        ctx.fillRect(0, 0, 256, 256);
+
+                        // 圆形边框
+                        ctx.strokeStyle = '#ecf0f1';
+                        ctx.lineWidth = 8;
+                        ctx.beginPath();
+                        ctx.arc(128, 128, 100, 0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        // 数字显示区域
+                        ctx.fillStyle = '#34495e';
+                        ctx.fillRect(60, 80, 136, 60);
+                        ctx.strokeStyle = '#ecf0f1';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(60, 80, 136, 60);
+
+                        // 显示"00"
+                        ctx.fillStyle = '#e74c3c';
+                        ctx.font = 'bold 36px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('00', 128, 120);
+
+                        // 标签
+                        ctx.fillStyle = '#ecf0f1';
+                        ctx.font = '14px Arial';
+                        ctx.fillText('DAYS', 128, 170);
+                }
+
+                function downloadIcon () {
+                        const link = document.createElement('a');
+                        link.download = 'app-icon.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                }
+
+                drawIcon();
+        </script>
+</body>
+
+</html>

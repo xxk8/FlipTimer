@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+  <link rel="stylesheet" href="./vendor/flip.min.css">
+</head>
+
+<body>
+  <style>
+    @font-face {
+      font-family: 'TyfoonSans';
+      src: url('./public/TyfoonSans W00 ExtraLight.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'Impact';
+      src: url('./public/impact.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'DouyuFont';
+      src: url('./public/douyuFont-2.otf') format('opentype');
+    }
+
+    .tick {
+      /* 响应式倒计时器样式 */
+      white-space: nowrap;
+      font-family: 'Impact', arial, sans-serif;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(2rem, 6vw, 8rem);
+    }
+
+    .tick-flip,
+    .tick-text-inline {
+      font-size: inherit;
+    }
+
+    .tick-label {
+      margin-top: 1em;
+      font-size: 0.5em;
+      font-family: 'DouyuFont', 'TyfoonSans', sans-serif;
+      font-weight: 900;
+    }
+
+    .tick-char {
+      width: 1.5em;
+    }
+
+    .tick-text-inline {
+      display: inline-block;
+      text-align: center;
+      min-width: 1em;
+    }
+
+    .tick-text-inline+.tick-text-inline {
+      margin-left: -.325em;
+    }
+
+    .tick-group {
+      position: relative;
+      text-align: center;
+      padding-top: 0.1rem;
+      padding-bottom: 0.1rem;
+    }
+
+    /* 精确控制翻转卡片间距 */
+    .tick-group [data-key="value"] {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .tick-flip {
+      margin: 0;
+    }
+
+
+
+    .tick-group::after {
+      position: absolute;
+      top: 50px;
+      content: '';
+      display: block;
+      margin-right: -0.01em;
+      left: 219px;
+      z-index: 50;
+      width: 14px;
+      height: 40px;
+      background-color: #000;
+      margin-top: 0.1rem;
+    }
+
+
+    /* .tick-group.has-hundreds::before {
+      position: absolute;
+      top: 50px;
+      content: '';
+      display: block;
+      margin-right: -0.01em;
+      z-index: 60;
+      width: 14px;
+      height: 40px;
+      background-color: #000;
+      margin-top: 0.1rem;
+    } */
+    .tick-group:first-child::after {
+      position: absolute;
+      top: 50px;
+      content: '';
+      display: block;
+      z-index: 60;
+      width: 14px;
+      height: 40px;
+      background-color: #000;
+    }
+
+    .tick-group:last-child::after {
+      display: none;
+    }
+
+    /* .tick-group.has-hundreds::after {
+      display: none;
+    } */
+
+    .tick-text-inline+.tick-text-inline {
+      margin-left: -.325em;
+    }
+
+    .tick-text {
+      font-size: 0.8rem;
+    }
+
+
+
+    html {
+      background-color: rgb(255, 255, 255);
+      background-image: url('./public/topLogo.png'), url('./public/right-button.png');
+      background-position: top left, right bottom;
+      background-repeat: no-repeat, no-repeat;
+      background-size: auto;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body {
+      height: 100vh;
+      margin: 0;
+      transform: scale(0.25);
+      transform-origin: top left;
+      width: 400vw;
+      height: 400vh;
+      overflow: hidden;
+    }
+
+    .tick-text-inline {
+      color: #000000 !important;
+    }
+
+    .tick-label {
+      color: #000000 !important;
+    }
+
+
+    .tick-flip-panel-text-wrapper {
+      line-height: 1.4 !important;
+    }
+
+
+    .tick-flip {
+      border-radius: 0em !important;
+      position: relative;
+    }
+
+    /* .tick-flip::after {
+      position: absolute;
+      top: 50px;
+      left: 6.1rem;
+      content: '';
+      display: block;
+      margin-right: 1rem;
+      z-index: 50;
+      width: 14px;
+      height: 40px;
+      background-color: #000;
+      margin-top: 0.1rem;
+    } */
+
+    .tick-flip:last-child::after {
+      display: none;
+    }
+
+
+    /* 移除翻转卡片中间的分割线 */
+    .tick-flip-panel::before {
+      display: none !important;
+    }
+
+    /* 设置面板样式 */
+    .settings-panel {
+      /* transform: scale(6); - 移除固定缩放，改为JavaScript动态控制 */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-origin: center center;
+      /* 设置缩放中心点 */
+    }
+
+    .settings-content {
+      background: rgba(242, 242, 247, 0.8);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: clamp(320px, 33.33vw, 500px);
+      max-height: 85vh;
+      overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #settings-header {
+      cursor: move;
+      user-select: none;
+      padding-bottom: 16px;
+    }
+
+    .settings-content h3 {
+      margin: 0;
+      text-align: center;
+      font-size: 1.25em;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .setting-group {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .setting-group label {
+      font-weight: 400;
+      color: #333;
+      flex-shrink: 0;
+      margin-right: 16px;
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      width: 65%;
+    }
+
+    .slider-container input[type="range"] {
+      width: 100%;
+      margin-right: 12px;
+    }
+
+    .slider-container span {
+      font-size: 0.9em;
+      color: #666;
+      min-width: 45px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      background: rgba(0, 0, 0, 0.1);
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      margin-top: -6px;
+      background-color: #fff;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      padding: 0;
+      cursor: pointer;
+      background-color: transparent;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+
+    .setting-group select {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px 32px 8px 12px;
+      background-image: url('data:image/svg+xml;charset=UTF-8S-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5z%22%20fill%3D%22%23888%22%2F%3E%3C%2Fsvg%3E');
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      width: auto;
+      min-width: 120px;
+      font-size: 14px;
+    }
+
+    .datetime-input {
+      background-color: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      width: auto;
+      min-width: 180px;
+    }
+
+    .file-upload-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      background: #fff;
+      color: #007aff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .setting-group button {
+      background: transparent;
+      color: #ff3b30;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .button-group {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .button-group button {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    #reset-settings {
+      background: #e5e5e7;
+      color: #1d1d1f;
+    }
+
+    #close-settings {
+      background: #007aff;
+      color: white;
+    }
+
+    .tick-flip-card {
+      border: 2px solid #211816;
+    }
+
+    .tick-counter-container {
+      border: 5px solid #211816;
+      padding: 0.04em;
+      display: inline-block;
+      margin-bottom: 3em;
+    }
+
+    .tick-group {
+      gap: 0.03em;
+      margin-right: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /*
+    .tick-group::before {
+      content: '';
+      display: block;
+      width: 14px;
+      height: 40px;
+      z-index: 50;
+      left: -10px;
+      background-color: #000;
+      position: absolute;
+      top: 50px;
+    } */
+
+    /* .tick-group:last-child::before, */
+    .tick-group:first-child::before {
+      display: none;
+    }
+
+    /* 将标签移到边框外部 */
+    .tick-label {
+      position: absolute;
+      bottom: -4em;
+      /* 将标签移到容器下方 */
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 0;
+      /* 重置原有的 margin-top */
+    }
+
+    .tick-flip-panel-back:after {
+      display: none !important;
+    }
+
+    /* 响应式媒体查询 */
+    @media (min-width: 1200px) {
+      .tick {
+        font-size: clamp(3rem, 5vw, 6rem);
+      }
+
+      html {
+        background-size: auto, auto;
+      }
+    }
+
+    /* 中等屏幕 (平板) - 768px到1199px */
+    @media (min-width: 768px) and (max-width: 1199px) {
+      .tick {
+        font-size: clamp(2.5rem, 7vw, 5rem);
+      }
+
+      html {
+        background-size: 150px auto, 80px auto;
+      }
+
+      .tick-counter-container {
+        border-width: 3px;
+      }
+    }
+
+    /* 小屏幕 (手机) - 767px以下 */
+    @media (max-width: 767px) {
+      .tick {
+        font-size: clamp(1.5rem, 10vw, 4rem);
+        /* 在小屏幕上稍微向上移动，为底部标签留空间 */
+        /* top通过JavaScript控制，这里不设置以避免冲突 */
+      }
+
+      html {
+        background-size: 120px auto, 60px auto;
+        background-position: 10px 10px, right 10px bottom 10px;
+      }
+
+      .tick-counter-container {
+        border-width: 2px;
+        margin-bottom: 2em;
+      }
+
+      .tick-label {
+        font-size: 0.4em;
+        bottom: -3em;
+      }
+
+      /* 设置面板在手机上的优化 */
+      .settings-content {
+        width: clamp(280px, 90vw, 400px);
+        padding: 16px;
+        max-height: 90vh;
+      }
+
+      .setting-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .slider-container {
+        width: 100%;
+      }
+    }
+
+
+    .tick-label {
+      bottom: -2.5em;
+      font-size: 1.5rem;
+    }
+  </style>
+
+  <div class="tick">
+    <div class="tick-counter-container">
+      <div data-repeat="true" data-layout="horizontal" data-transform="preset(d, h, m, s) -> delay">
+        <div class="tick-group">
+          <div data-key="value" data-repeat="true" data-transform="pad(00) -> split -> delay">
+            <span data-view="flip"></span>
+          </div>
+          <span data-key="label" data-view="text" class="tick-label"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置面板 -->
+  <div id="settings-panel" class="settings-panel" style="display: none;">
+    <div class="settings-content">
+      <h3 id="settings-header">倒计时设置</h3>
+
+      <!-- 目标时间设置 -->
+      <div class="setting-group">
+        <label for="target-datetime">目标时间</label>
+        <input type="datetime-local" id="target-datetime" class="datetime-input" lang="zh-CN">
+      </div>
+
+      <!-- 快速测试按钮 -->
+      <div class="setting-group">
+        <label>快速测试</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="test-100-days" class="file-label" style="font-size: 12px; padding: 4px 8px;">100天后</button>
+          <button id="test-200-days" class="file-label" style="font-size: 12px; padding: 4px 8px;">200天后</button>
+          <button id="test-365-days" class="file-label" style="font-size: 12px; padding: 4px 8px;">365天后</button>
+        </div>
+      </div>
+
+      <!-- 大小设置 -->
+      <div class="setting-group">
+        <label for="size-slider">倒计时大小</label>
+        <div class="slider-container">
+          <input type="range" id="size-slider" min="1" max="125" step="0.1" value="6.5">
+          <span id="size-value">4 rem</span>
+        </div>
+      </div>
+
+      <!-- 位置设置 -->
+      <div class="setting-group">
+        <label for="horizontal-slider">水平位置</label>
+        <div class="slider-container">
+          <input type="range" id="horizontal-slider" min="0" max="100" value="50">
+          <span id="horizontal-value">50%</span>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label for="vertical-slider">垂直位置</label>
+        <div class="slider-container">
+          <input type="range" id="vertical-slider" min="0" max="100" value="50">
+          <span id="vertical-value">50%</span>
+        </div>
+      </div>
+
+      <!-- 边框颜色 -->
+      <div class="setting-group">
+        <label>边框颜色:</label>
+        <input type="color" id="border-color" value="#cccccc">
+      </div>
+
+      <!-- 方块底色 -->
+      <div class="setting-group">
+        <label>方块底色:</label>
+        <input type="color" id="background-color" value="#f7fff7">
+      </div>
+
+      <!-- 数字颜色 -->
+      <div class="setting-group">
+        <label>数字颜色:</label>
+        <input type="color" id="number-color" value="#ff0004">
+      </div>
+
+      <!-- 数字粗细 -->
+      <div class="setting-group">
+        <label>数字粗细:</label>
+        <select id="font-weight">
+          <option value="100">极细</option>
+          <option value="300">细</option>
+          <option value="400">正常</option>
+          <option value="700">粗</option>
+          <option value="900">极粗</option>
+        </select>
+      </div>
+
+      <!-- 面板缩放 -->
+      <div class="setting-group">
+        <label>面板缩放</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span id="zoom-level" style="min-width: 60px; font-size: 0.9em; color: #666;">100%</span>
+          <button id="reset-zoom" class="file-label" style="font-size: 12px; padding: 4px 8px;">重置缩放</button>
+        </div>
+      </div>
+
+      <!-- 倒计时缩放 -->
+      <div class="setting-group">
+        <label>倒计时缩放</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span id="page-zoom-level" style="min-width: 60px; font-size: 0.9em; color: #666;">100%</span>
+          <button id="reset-page-zoom" class="file-label" style="font-size: 12px; padding: 4px 8px;">重置缩放</button>
+        </div>
+      </div>
+
+      <!-- 全屏模式 -->
+      <div class="setting-group">
+        <label>全屏模式</label>
+        <button id="toggle-fullscreen" class="file-label">切换全屏</button>
+      </div>
+
+      <!-- 标签字体设置 -->
+      <div class="setting-group">
+        <label>标签字体</label>
+        <div class="file-upload-wrapper">
+          <label for="label-font" class="file-label">选择字体文件</label>
+          <input type="file" id="label-font" accept=".ttf,.otf,.woff,.woff2">
+          <button id="reset-font">重置字体</button>
+        </div>
+      </div>
+
+      <!-- 背景图片 -->
+      <div class="setting-group">
+        <label>背景图片</label>
+        <div class="file-upload-wrapper">
+          <label for="background-image" class="file-label">选择文件</label>
+          <input type="file" id="background-image" accept="image/*">
+          <button id="remove-bg">移除背景</button>
+        </div>
+      </div>
+
+      <!-- 按钮组 -->
+      <div class="button-group">
+        <button id="reset-settings">重置</button>
+        <button id="close-settings">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./vendor/flip.min.js"></script>
+  <script src="./main.js"></script>
+</body>
+
+</html>
