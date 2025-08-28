@@ -4,7 +4,7 @@
 
 <div align="center" style="margin: 24px 0;">
   <img src="./public/show.png" alt="FlipTimer 展示" width="350"/>
-  <video src="./public/demonstration.mov" width="350" controls style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12);"></video>
+  <img src="./public/demonstration.gif" width="350" controls style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12);"></img>
   <div style="color: #888; font-size: 14px; margin-top: 8px;">功能演示视频</div>
 </div>
 
